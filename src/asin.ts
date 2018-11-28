@@ -2,7 +2,8 @@ import { APIGatewayProxyHandler, APIGatewayEvent, Context } from 'aws-lambda';
 import axios from 'axios';
 import jsdom from 'jsdom'; // new jsdom type definitions don't exist so using Javascript
 import * as AWS from 'aws-sdk';
-import { AsinRequest, PutItemAsinInformation } from './constants/interfaces';
+import { parseAsinInfo } from './util/domParser';
+import { AsinRequest, PutItemAsinInformation, AsinInfoResponse } from './constants/interfaces';
 import { asinTableName } from './constants/config';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
@@ -15,10 +16,6 @@ export const asinInfo: APIGatewayProxyHandler = async (event: APIGatewayEvent, c
     statusCode: 404,
     body: JSON.stringify({ errorMessage: message }),
   });
-  const responseData = {
-    productDimensions: '',
-    rank: '',
-  };
 
   if (!event.body) {
     return response404('Expected parameter asin');
@@ -35,20 +32,9 @@ export const asinInfo: APIGatewayProxyHandler = async (event: APIGatewayEvent, c
     return response404('Invalid ASIN, Amazon is down or ignoring your requests.');
   }
 
+  let responseData: AsinInfoResponse;
   try {
-    const dom = new jsdom.JSDOM(htmlResponse.data, { virtualConsole: new jsdom.VirtualConsole() });
-    const tableHeaders = dom.window.document.querySelectorAll('#productDetails_detailBullets_sections1 th');
-    for (const tableHeader of tableHeaders) {
-      const headerText = tableHeader.textContent ? tableHeader.textContent.trim() : '';
-      switch (headerText) {
-        case 'Product Dimensions':
-          responseData.productDimensions = tableHeader.nextElementSibling.textContent.trim();
-          break;
-        case 'Best Sellers Rank':
-          responseData.rank = tableHeader.nextElementSibling.textContent.trim();
-          break;
-      }
-    }
+    responseData = parseAsinInfo(htmlResponse.data);
   } catch (e) {
     return response404('Unable to parse data');
   }
