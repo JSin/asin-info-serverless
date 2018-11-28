@@ -1,0 +1,22 @@
+service:
+  name: asin-info-serverless
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+functions:
+  asinInfo:
+    handler: src/asin.asinInfo
+    events:
+      - http:
+          method: post
+          path: asin-info
+
+custom:
+  serverless-offline:
+    port: 4000
