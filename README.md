@@ -21,6 +21,8 @@ $ npm run setup-tables
 $ npx serverless offline start
 ```
 
+Note: This will not work on production as you need to change the DynamoDB connections and add the policies to serverless.yml
+
 ## Assumptions and Considerations
 * Because ASIN data must always be up to date and there is no easy way to verify if the data is up to date, you always have to query the source.
 * I would reconsider using up-to-date data because of the request latency and the cost associated to that in lambda functions. Below are possible redesigns:
@@ -31,5 +33,5 @@ $ npx serverless offline start
 * This solution naturally scales as AWS scales out Lambda and DynamoDB (as of late they have been working on scaling DynamoDB).
 * At the end of the day parsing Amazon is a bad idea due how pages can differ so easily.
 * I considered using Puppeteer but Lambda does have size limit restrictions.
-* Originally I buit the lambda function in golang and tested on AWS but serverless-offline doesn't exist for golang.
+* Originally I built the lambda function in golang and tested on AWS but serverless-offline doesn't exist for golang.
   * Debated on using localstack with Go but decided just to rewrite in nodejs.
