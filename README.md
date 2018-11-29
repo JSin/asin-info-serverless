@@ -30,5 +30,6 @@ $ npx serverless offline start
   * Using a server or even lambda is a bad idea without background processes because as you scale the 2 second response per request really adds up in server costs.
 * This solution naturally scales as AWS scales out Lambda and DynamoDB (as of late they have been working on scaling DynamoDB).
 * At the end of the day parsing Amazon is a bad idea due how pages can differ so easily.
+* I considered using Puppeteer but Lambda does have size limit restrictions.
 * Originally I buit the lambda function in golang and tested on AWS but serverless-offline doesn't exist for golang.
   * Debated on using localstack with Go but decided just to rewrite in nodejs.
